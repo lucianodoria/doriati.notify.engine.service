@@ -1,6 +1,6 @@
 ﻿![Imagem de capa da videoaula de CI/CD com GITLAB + VPS Linux + Microsserviço em .NET 9](capa.png)
 
-📺 **Assista no YouTube:** [Link da videoaula](https://www.youtube.com/watch?v=UzcWW3AAjQU)
+📺 **Assista no YouTube:** [Link da videoaula](https://youtu.be/PtsZcDvk2tQ)
 
 # Comandos da videoaula
 
@@ -128,7 +128,7 @@ shutdown_timeout = 0
     network_mtu = 0
 ```
 
-[![Assista no YouTube](https://img.shields.io/badge/YouTube-Assistir%20Videoaula-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=UzcWW3AAjQU)
+[![Assista no YouTube](https://img.shields.io/badge/YouTube-Assistir%20Videoaula-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/PtsZcDvk2tQ)
 
 ---
 
