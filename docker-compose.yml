@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  notify-engine:
+    image: registry.gitlab.com/doriati/doriati.notify.engine.service:latest
+    container_name: doriati_notify_engine
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - AllowedClients__GCD_APP=${PROD_SECRET_GCD}
+      - AllowedClients__BWEB_APP=${PROD_SECRET_BWEB}
+      - RabbitMq__HostName=${PROD_RABBIT_HOST}
+      - RabbitMq__UserName=${PROD_RABBIT_USER}
+      - RabbitMq__Password=${PROD_RABBIT_PASS}
+      - RabbitMq__Port=5672
+      - RabbitMq__Queue=${PROD_RABBIT_QUEUE_TELEGRAM}
+      - RabbitMq__VirtualHost=/prod
+    restart: always

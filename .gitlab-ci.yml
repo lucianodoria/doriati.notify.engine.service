@@ -1,0 +1,89 @@
+# =========================================================
+# PIPELINE DE BUILD + DEPLOY LOCAL (Runner self-hosted)
+# =========================================================
+
+stages:
+  - build
+  - deploy
+
+# Variáveis globais do pipeline
+variables:
+  # Caminho físico do projeto NA VPS
+  TARGET_DIR: "/var/www/workers/notify-engine"
+
+# =========================================================
+# ETAPA 1: BUILD DA IMAGEM DOCKER
+# =========================================================
+build_job:
+  stage: build
+
+  # Imagem oficial do Docker usada pelo job
+  image: docker:27
+
+  # Garante que esse job só rode no runner correto
+  tags:
+    - deploy
+
+  rules:
+    # 1. Executa o build se for um Merge Request vindo de QUALQUER branch para a master
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+      when: always
+    # 2. Executa o build se for um push direto na master (ou o resultado final do Merge concluído)
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: always
+    # 3. Bloqueia pushes normais em outras branches
+    - when: never
+  
+  before_script:
+    - docker info
+    # Login no Container Registry do GitLab
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+
+  script:
+    # Build da imagem usando o Dockerfile do projeto
+    - docker build -t "$CI_REGISTRY_IMAGE:latest" .
+
+    # Envia a imagem para o Container Registry do GitLab
+    - docker push "$CI_REGISTRY_IMAGE:latest"
+
+
+# =========================================================
+# ETAPA 2: DEPLOY LOCAL NA VPS (SEM SSH)
+# =========================================================
+deploy_job:
+  stage: deploy
+
+  # Usa imagem Docker para controlar containers locais
+  image: docker:27
+
+  # Runner específico de produção
+  tags:
+    - deploy
+ 
+  rules:
+    # O deploy SÓ roda quando o código entra definitivamente na branch master
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: always
+    - when: never
+  
+  before_script:
+    - docker info
+    # Login no Container Registry do GitLab
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+
+  script:
+    # 1. Baixa a versão mais recente da imagem que acabou de ser buildada
+    - docker compose -f docker-compose.yml pull
+    
+    # 2. Para e remove o container antigo na marra (se ele existir)
+    # O "|| true" no final garante que se o container não existir, o pipeline não pare com erro
+    - docker rm -f doriati_notify_engine || true
+    
+    # 3. Sobe/atualiza o container forçando a recriação e limpando containers antigos
+    # --force-recreate : Diz ao Docker para ignorar o container existente e recriá-lo do zero com a imagem nova.
+    # --remove-orphans : Garante que nenhuma sobra antiga de container fique pendente.
+    - docker compose -f docker-compose.yml up -d --build --force-recreate --remove-orphans
+
+  # Só executa quando o build foi bem-sucedido e ok
+  needs:
+    - build_job
