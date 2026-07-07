@@ -8,7 +8,7 @@
 ### Criar diretório padrão
 
 Primeiro você cria a pasta:
-```powershell
+```bash
 sudo mkdir -p /srv/gitlab-runner
 ```
 Depois você entra na pasta:
@@ -17,7 +17,7 @@ cd /srv/gitlab-runner
 ```
 
 Agora execute esse comando para criar e iniciar um novo contêiner do GitLab Runner.
-```powershell
+```docker
 docker run -d \
   --name gitlab-runner \
   --restart always \
@@ -43,7 +43,7 @@ Imagem após executar o comando.
 > bind do docker.sock é obrigatório para o executor Docker controlar containers.
 
 ### Verificar se o Runner está rodando
-```powershell
+```docker
 docker ps | grep gitlab-runner
 ```
 Imagem deve ser parecida com essa abaixo. O que importar é a úlima informação __Up 13 seconds__ (está online a 13 segundos).
@@ -55,12 +55,12 @@ Imagem deve ser parecida com essa abaixo. O que importar é a úlima informaçã
 ### Execute o comando abaixo para registrar um Runner
 
 O comando abaixo inicia o registro do Runner na VPS
-```powershell
+```docker
 docker exec -it gitlab-runner gitlab-runner register
 ```
 Depois irá pedir as informações abaixo:
 
-```powershell
+```bash
 GitLab instance URL:
 https://gitlab.com/
 
@@ -81,18 +81,18 @@ docker:27
 ```
 ### Reiniciar
 Execute o comando a seguir para reiniciar o GitLab Runner
-```powershell
+```docker
 docker restart gitlab-runner
 ```
 
 # Arquivo com as configurações dos Runners
 
 Caso queira ver se o registro funcionou, pode olhar o arquivo **config.toml** com o comando a seguir, você abre o arquivo:
-```powershell
+```bash
 sudo nano /srv/gitlab-runner/config/config.toml
 ```
 Deve aparecer uma tela como esta abaixo. Para sair, basta clicar em **Ctrl** + **X**.
-```powershell
+```
 concurrent = 1
 check_interval = 0
 connection_max_age = "15m0s"
